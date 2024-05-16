@@ -5,6 +5,8 @@ from flask_migrate import Migrate
 
 from models import db, Bakery, BakedGood
 
+import ipdb
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,9 +27,9 @@ def bakeries():
 
 @app.route('/bakeries/<int:id>', methods=["GET", "PATCH"])
 def bakery_by_id(id):
+    bakery = Bakery.query.filter_by(id=id).first()
 
     if request.method == "GET":
-        bakery = Bakery.query.filter_by(id=id).first()
         bakery_serialized = bakery.to_dict()
         return make_response ( bakery_serialized, 200  )
     
@@ -47,7 +49,7 @@ def bakery_by_id(id):
 
         return response
 
-@app.route("/bakedgoods", methods=["GET", "POST"])
+@app.route("/baked_goods", methods=["GET", "POST"])
 def baked_goods():
 
     if request.method == "GET":
@@ -65,7 +67,8 @@ def baked_goods():
             name = request.form.get("name"),
             price = request.form.get("price"),
             created_at = request.form.get("created_at"),
-            updated_at = request.form.get("updated_at")
+            updated_at = request.form.get("updated_at"),
+            bakery_id = request.form.get("bakery_id")
         )
 
         db.session.add(new_baked_good)
@@ -75,7 +78,7 @@ def baked_goods():
 
         response = make_response(
             new_baked_good_dict,
-            200
+            201
         )
 
         return response
